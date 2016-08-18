@@ -33,6 +33,8 @@ class InsureHubApiClient
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+        curl_setopt($ch, CURLOPT_CAINFO, getcwd()."/ComodoCACert.cer");
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
             'X-InsuranceHub-VendorId: '.$request->vendorId,
@@ -164,8 +166,8 @@ class InsureHubApiValidationException extends InsureHubException {
 $vendorId = "59B9F7DA-07BD-E311-9956-002186EB0899"; // should be read from config
 $apiKey = "EF4AA52D-C295-4330-B45E-33130EF0E109"; // 5should be read from config
 
-$offeringRequestUrl = "http://uat.quote.insure-hub.net/quote"; // should be read from config
-$offeringResultUrl = "http://uat.sales.insure-hub.net/sales"; // should be read from config
+$offeringRequestUrl = "https://quote.uat.insure-hub.net/quote"; // should be read from config
+$offeringResultUrl = "https://sales.uat.insure-hub.net/sales"; // should be read from config
 
 $break = "</br>";
 
