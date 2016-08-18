@@ -18,9 +18,11 @@ class InsureHubAuthTokenGenerator
 class InsureHubApiClient
 {
     public $url;
+    public $certificatePath;
 
-    public function __construct($serviceUrl) {
+    public function __construct($serviceUrl, $CACertificatePath) {
         $this->url = $serviceUrl;
+        $this->certificatePath = $CACertificatePath;
     }
 
 	public function execute($request)
@@ -34,7 +36,7 @@ class InsureHubApiClient
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-        curl_setopt($ch, CURLOPT_CAINFO, getcwd()."/ComodoCACert.cer");
+        curl_setopt($ch, CURLOPT_CAINFO, $this->certificatePath);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
             'X-InsuranceHub-VendorId: '.$request->vendorId,
@@ -169,6 +171,8 @@ $apiKey = "EF4AA52D-C295-4330-B45E-33130EF0E109"; // 5should be read from config
 $offeringRequestUrl = "https://quote.uat.insure-hub.net/quote"; // should be read from config
 $offeringResultUrl = "https://sales.uat.insure-hub.net/sales"; // should be read from config
 
+$certPath = getcwd()."/ComodoCACert.cer"; // change this to somewhere appropriate on your server (certificate can be found alongside this file in this git repository)
+
 $break = "</br>";
 
 // create request object and security info
@@ -193,7 +197,7 @@ $request->products[0] = $product1;
 $request->products[1] = $product2;
 
 // create client
-$offeringClient = new InsureHubApiClient($offeringRequestUrl);
+$offeringClient = new InsureHubApiClient($offeringRequestUrl, $certPath);
 
 try{
     $offering = $offeringClient->execute($request)[1];
@@ -229,7 +233,7 @@ try{
     }
 
     // send result
-    $resultClient = new InsureHubApiClient($offeringResultUrl);
+    $resultClient = new InsureHubApiClient($offeringResultUrl, $certPath);
 
     $responseCode = $resultClient->execute($result)[0];
 
