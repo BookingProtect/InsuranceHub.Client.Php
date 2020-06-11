@@ -11,7 +11,7 @@ class InsureHubAuthTokenGenerator
         $formattedApiKey = str_replace('-', '', strtolower($apiKey));
         $date = gmdate('dmY');
 
-        return base64_encode(hash_hmac('sha1', $formattedVendorId.$date, $formattedApiKey, true));
+        return base64_encode(hash_hmac('sha256', $formattedVendorId.$date, $formattedApiKey, true));
     }
 }
 
@@ -171,7 +171,7 @@ $apiKey = "EF4AA52D-C295-4330-B45E-33130EF0E109"; // 5should be read from config
 $offeringRequestUrl = "https://quote.uat.insure-hub.net/quote"; // should be read from config
 $offeringResultUrl = "https://sales.uat.insure-hub.net/sales"; // should be read from config
 
-$certPath = getcwd()."/ComodoCACert.cer"; // change this to somewhere appropriate on your server (certificate can be found alongside this file in this git repository)
+$certPath = getcwd()."/cacert.pem"; // change this to somewhere appropriate on your server (certificate can be found alongside this file in this git repository)
 
 $break = "</br>";
 
