@@ -1,0 +1,28 @@
+{
+  "name": "booking-protect/insurance-hub-client",
+  "description": "PHP Library to connect to Booking Protect Insurance Hub APIs",
+  "type": "library",
+  "license": "MIT",
+  "keywords": [
+    "BookingProtect",
+    "Booking Protect",
+    "InsuranceHub",
+    "InsureHub"
+  ],
+  "homepage": "https://developers.bookingprotect.com",
+  "authors": [
+    {
+      "name": "Booking Protect",
+      "email": "technology@bookingprotect.com"
+    }
+  ],
+  "minimum-stability": "stable",
+  "autoload": {
+    "psr-4": {"BookingProtect\\InsuranceHub\\Client\\": "src/"}
+  },
+  "require": {
+    "php": "^7.4|| ^8.0",
+    "ext-curl": "*",
+    "ext-json": "*"
+  }
+}
