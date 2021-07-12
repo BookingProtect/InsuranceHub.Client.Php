@@ -3,19 +3,24 @@
 namespace BookingProtect\InsuranceHub\Client;
 
 use Exception;
-use ReflectionObject;
-use ReflectionProperty;
-use stdClass;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\RequestOptions;
+use JsonMapper;
 
 class ApiClient implements IApiClient {
     private IAuthTokenGenerator $authTokenGenerator;
     private ApiClientConfiguration $configuration;
     private IApiClientUrlBuilder $apiClientUrlBuilder;
+    private JsonMapper $jsonMapper;
 
     public function __construct(ApiClientConfiguration $configuration, IAuthTokenGenerator $authTokenGenerator, IApiClientUrlBuilder $apiClientUrlBuilder) {
         $this->authTokenGenerator  = $authTokenGenerator;
         $this->configuration       = $configuration;
         $this->apiClientUrlBuilder = $apiClientUrlBuilder;
+        $this->jsonMapper          = new JsonMapper();
     }
 
     /**
@@ -28,7 +33,7 @@ class ApiClient implements IApiClient {
     public function getOffering(OfferingRequest $offeringRequest): Offering {
         $result = $this->execute($this->apiClientUrlBuilder->offeringRequestUrl(), 'POST', $offeringRequest);
 
-        return $this->map(json_decode($result->responseBody), new Offering());
+        return $this->jsonMapper->map(json_decode($result->getBody()->getContents()), new Offering());
     }
 
     /**
@@ -40,7 +45,7 @@ class ApiClient implements IApiClient {
     public function submitOfferingResult(OfferingResult $offeringResult): bool {
         $result = $this->execute($this->apiClientUrlBuilder->offeringResultUrl(), 'POST', $offeringResult);
 
-        return $result->statusCode == 200;
+        return $result->getStatusCode() == 200;
     }
 
     /**
@@ -53,11 +58,12 @@ class ApiClient implements IApiClient {
     public function getMatrix(MatrixRequest $matrixRequest): ?Matrix {
         $result = $this->execute($this->apiClientUrlBuilder->matrixUrl($matrixRequest), 'GET');
 
-        if (is_null($result->responseBody)) {
+        $data = $result->getBody()->getContents();
+        if (is_null($data)) {
             return NULL;
         }
 
-        return $this->map(json_decode($result->responseBody), new Matrix());
+        return $this->jsonMapper->map(json_decode($data), new Matrix());
     }
 
     /**
@@ -70,11 +76,12 @@ class ApiClient implements IApiClient {
     public function getPriceBand(PriceBandRequest $priceBandRequest): ?PriceBand {
         $result = $this->execute($this->apiClientUrlBuilder->priceBandUrl($priceBandRequest), 'GET');
 
-        if (is_null($result->responseBody)) {
-            return NULL;
+        $data = $result->getBody()->getContents();
+        if (is_null($data)) {
+            return null;
         }
 
-        return $this->map(json_decode($result->responseBody), new PriceBand());
+        return $this->jsonMapper->map(json_decode($data), new PriceBand());
     }
 
     /**
@@ -88,13 +95,14 @@ class ApiClient implements IApiClient {
     public function searchForPolicy(PolicySearch $policySearch): array {
         $result = $this->execute($this->apiClientUrlBuilder->policySearchUrl(), 'POST', $policySearch);
 
-        if (is_null($result->responseBody)) {
+        $data = $result->getBody()->getContents();
+        if (is_null($data)) {
             return [];
         }
 
-        $arr = json_decode($result->responseBody);
+        $arr = json_decode($data);
 
-        return $this->mapArray($arr, 'BookingProtect\InsuranceHub\Client\Policy');
+        return $this->jsonMapper->mapArray($arr, 'BookingProtect\InsuranceHub\Client\Policy');
     }
 
     /**
@@ -107,11 +115,12 @@ class ApiClient implements IApiClient {
     public function searchForPolicyByOfferingId(PolicySearchByOfferingId $policySearch): ?Policy {
         $result = $this->execute($this->apiClientUrlBuilder->policySearchByOfferingIdUrl(), 'POST', $policySearch);
 
-        if (is_null($result->responseBody)) {
+        $data = $result->getBody()->getContents();
+        if (is_null($data)) {
             return NULL;
         }
 
-        return $this->map(json_decode($result->responseBody), new Policy());
+        return $this->jsonMapper->map(json_decode($data), new Policy());
     }
 
     /**
@@ -124,7 +133,7 @@ class ApiClient implements IApiClient {
     public function getAdjustmentOffering(AdjustmentRequest $adjustmentRequest): AdjustmentOffering {
         $result = $this->execute($this->apiClientUrlBuilder->adjustmentRequestUrl(), 'POST', $adjustmentRequest);
 
-        return $this->map(json_decode($result->responseBody), new AdjustmentOffering());
+        return $this->jsonMapper->map(json_decode($result->getBody()->getContents()), new AdjustmentOffering());
     }
 
     /**
@@ -136,7 +145,7 @@ class ApiClient implements IApiClient {
     public function submitAdjustmentResult(AdjustmentOfferingResult $adjustmentResult): bool {
         $result = $this->execute($this->apiClientUrlBuilder->adjustmentResultUrl(), 'POST', $adjustmentResult);
 
-        return $result->statusCode == 201;
+        return $result->getStatusCode() == 201;
     }
 
     /**
@@ -148,7 +157,7 @@ class ApiClient implements IApiClient {
     public function cancelSale(CancellationRequest $cancellationRequest): bool {
         $result = $this->execute($this->apiClientUrlBuilder->cancellationUrl(), 'POST', $cancellationRequest);
 
-        return $result->statusCode == 201;
+        return $result->getStatusCode() == 201;
     }
 
     /**
@@ -159,134 +168,36 @@ class ApiClient implements IApiClient {
      * @throws InsureHubApiException
      * @throws InsureHubApiValidationException
      */
-    private function execute(string $url, string $method, $requestBody = NULL): CurlResponse {
+    private function execute(string $url, string $method, $requestBody = NULL): Response {
         $authToken = $this->authTokenGenerator->generateToken($this->configuration->vendorId, $this->configuration->apiKey);
 
-        $ch = curl_init($url);
-
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-        if ($method == 'POST') {
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($requestBody));
-        }
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-        curl_setopt($ch, CURLOPT_CAINFO, $this->configuration->certificatePath);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'Authorization: Bearer ' . $this->configuration->vendorId . '|' . $authToken
-        ]);
-
-        $response = curl_exec($ch);
-
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-        switch ($httpCode) {
-            case 401:
-                throw new InsureHubApiAuthenticationException();
-            case 403:
-                throw new InsureHubApiAuthorisationException();
-            case 400:
-                $validationError = json_decode($response);
-
-                $validationMessages = implode(',', $validationError->validationMessages);
-
-                throw new InsureHubApiValidationException($validationMessages);
-            case 500:
-                $apiError = json_decode($response);
-                throw new InsureHubApiException($apiError->message);
-        }
-
-        curl_close($ch);
-
-        $result = new CurlResponse();
-
-        if (trim($response) == '') {
-            $response = NULL;
-        }
-
-        $result->statusCode   = $httpCode;
-        $result->responseBody = $response;
-
-        return $result;
-    }
-
-    /**
-     * @param stdClass $sourceObject
-     * @param Offering|Matrix|PriceBand|Policy|AdjustmentOffering $destination
-     *
-     * @return Offering|Matrix|PriceBand|Policy|AdjustmentOffering
-     * @throws Exception
-     */
-    private function map(stdClass $sourceObject, $destination) {
-        $sourceReflection      = new ReflectionObject($sourceObject);
-        $destinationReflection = new ReflectionObject($destination);
-        $sourceProperties      = $sourceReflection->getProperties(ReflectionProperty::IS_PUBLIC);
-
-        foreach ($sourceProperties as $sourceProperty) {
-            $sourceProperty->setAccessible(TRUE);
-            $name  = $sourceProperty->getName();
-            $value = $sourceProperty->getValue($sourceObject);
-            if ($destinationReflection->hasProperty($name)) {
-                $propDest = $destinationReflection->getProperty($name);
-
-                if ($propDest->hasType() && $propDest->getType() == 'DateTime') {
-                    if (is_null($value) && $propDest->getType()->allowsNull()) {
-                        $value = NULL;
-                    } else {
-                        $date = date_create_from_format('Y-m-d\TH:i:s.v\Z', $value);
-
-                        if ($date == FALSE) {
-                            $date = date_create_from_format('Y-m-d\TH:i:s\Z', $value);
-                        }
-
-                        if ($date == FALSE) {
-                            $value = NULL;
-                        }
-
-                        $value = $date;
-                    }
-                } elseif ($propDest->hasType() && $propDest->getType() == 'array') {
-                    $comment = $propDest->getDocComment();
-
-                    if ($comment != FALSE) {
-                        $comment = preg_replace('/\r\n/i', '', $comment);
-                        $comment = str_replace('/', '', $comment);
-                        $comment = str_replace('*', '', $comment);
-                        $comment = str_replace('@var', '', $comment);
-                        $comment = str_replace(' ', '', $comment);
-                        $comment = str_replace('[]', '', $comment);
-
-                        $value = $this->mapArray($value, $comment);
-                    }
-                } elseif ($propDest->hasType() && ! $propDest->getType()->isBuiltin()) {
-                    $typeName = $propDest->getType()->getName();
-                    $value    = $this->map($value, new $typeName());
-                }
-
-                $propDest->setAccessible(TRUE);
-                $propDest->setValue($destination, $value);
-            } else {
-                $destination->$name = $value;
+        $client = new Client();
+        $request = new Request($method, $url, [
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer ' . $this->configuration->vendorId . '|' . $authToken
+        ], $requestBody ? json_encode($requestBody) : null);
+        try {
+            $response = $client->send($request, [
+                RequestOptions::VERIFY => $this->configuration->certificatePath
+            ]);
+            switch ($response->getStatusCode()) {
+                case 401:
+                    throw new InsureHubApiAuthenticationException();
+                case 403:
+                    throw new InsureHubApiAuthorisationException();
+                case 400:
+                    $validationError    = json_decode($response->getBody()->getContents());
+                    $validationMessages = implode(',', $validationError->validationMessages);
+                    throw new InsureHubApiValidationException($validationMessages);
+                case 500:
+                    $apiError = json_decode($response->getBody()->getContents());
+                    throw new InsureHubApiException($apiError->message);
             }
+
+            return $response;
         }
-
-        return $destination;
-    }
-
-    /**
-     * @param stdClass[] $source
-     * @param string $destinationType
-     *
-     * @return array
-     * @throws Exception
-     */
-    private function mapArray(array $source, string $destinationType): array {
-        $result = [];
-        foreach ($source as $item) {
-            $destination = new $destinationType();
-            $result[]    = $this->map($item, $destination);
+        catch (GuzzleException $e) {
+            throw new InsureHubApiException($e);
         }
-
-        return $result;
     }
 }
