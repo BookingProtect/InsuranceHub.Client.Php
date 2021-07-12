@@ -1,5 +1,5 @@
 {
-  "name": "booking-protect/insurance-hub-client",
+  "name": "urizev/booking-protect",
   "description": "PHP Library to connect to Booking Protect Insurance Hub APIs",
   "type": "library",
   "license": "MIT",
@@ -9,11 +9,11 @@
     "InsuranceHub",
     "InsureHub"
   ],
-  "homepage": "https://developers.bookingprotect.com",
+  "homepage": "https://github.com/urizev",
   "authors": [
     {
-      "name": "Booking Protect",
-      "email": "technology@bookingprotect.com"
+      "name": "Urizev",
+      "email": "urizev@gmailcom"
     }
   ],
   "minimum-stability": "stable",
