@@ -17,7 +17,7 @@ $config = parse_ini_file('config.ini');
 $apiConfig = new BP\ApiClientConfiguration();
 
 $apiConfig->environment = $config['environment'];
-$apiConfig->certificatePath = getcwd().'\cacert.pem'; // change this to somewhere appropriate on your server (Latest Mozilla certificate store can be found here - https://curl.haxx.se/docs/caextract.html )
+$apiConfig->certificatePath = __DIR__ . '/cacert.pem'; // change this to somewhere appropriate on your server (Latest Mozilla certificate store can be found here - https://curl.haxx.se/docs/caextract.html )
 $apiConfig->apiKey = $config['api_key'];
 $apiConfig->vendorId = $config['vendor_id'];
 
@@ -30,7 +30,7 @@ $vendorId = $config['vendor_id'];
 $policySearch = new BP\PolicySearch();
 
 $policySearch->vendorId = $vendorId;
-$policySearch->vendorSalesReference = 'Your Sales Reference/Invoice Number';
+$policySearch->vendorSalesReference = uniqid('TEST_REF_'); // this can be null - only used as an identifier for your request
 $policySearch->customerForename = 'Customer Forename';
 $policySearch->customerSurname = 'Customer Surname';
 
