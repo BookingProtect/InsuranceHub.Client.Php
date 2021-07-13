@@ -4,7 +4,7 @@
 // ****************************************************************
 
 // include client lib - as below or via compose
-include '..\src\client.php';
+include __DIR__ . '/../vendor/autoload.php';
 
 // import namespace
 use BookingProtect\InsuranceHub\Client as BP;
@@ -17,7 +17,7 @@ $config = parse_ini_file('config.ini');
 $apiConfig = new BP\ApiClientConfiguration();
 
 $apiConfig->environment = $config['environment'];
-$apiConfig->certificatePath = getcwd().'\cacert.pem'; // change this to somewhere appropriate on your server (Latest Mozilla certificate store can be found here - https://curl.haxx.se/docs/caextract.html )
+$apiConfig->certificatePath = __DIR__ . '/cacert.pem'; // change this to somewhere appropriate on your server (Latest Mozilla certificate store can be found here - https://curl.haxx.se/docs/caextract.html )
 $apiConfig->apiKey = $config['api_key'];
 $apiConfig->vendorId = $config['vendor_id'];
 
@@ -30,7 +30,7 @@ $cancellationRequest->offeringId = '8be79be5-e276-432b-b888-23bc099e067a';
 
 try
 {
-    $break = '</br>';
+    $break = php_sapi_name() == 'cli' ? "\n" : '</br>';
 
     echo 'Cancelling sale for Offering '.$cancellationRequest->offeringId.$break.$break;
 

@@ -4,7 +4,7 @@
 // ****************************************************************
 
 // include client lib - as below or via compose
-include '..\src\client.php';
+include '..\vendor\autoload.php';
 
 // import namespace
 use BookingProtect\InsuranceHub\Client as BP;
@@ -17,7 +17,7 @@ $config = parse_ini_file('config.ini');
 $apiConfig = new BP\ApiClientConfiguration();
 
 $apiConfig->environment = $config['environment'];
-$apiConfig->certificatePath = getcwd().'\cacert.pem'; // change this to somewhere appropriate on your server (Latest Mozilla certificate store can be found here - https://curl.haxx.se/docs/caextract.html )
+$apiConfig->certificatePath = __DIR__ . '/cacert.pem'; // change this to somewhere appropriate on your server (Latest Mozilla certificate store can be found here - https://curl.haxx.se/docs/caextract.html )
 $apiConfig->apiKey = $config['api_key'];
 $apiConfig->vendorId = $config['vendor_id'];
 
@@ -27,7 +27,7 @@ $client = new BP\ApiClient($apiConfig, new BP\AuthTokenGenerator(), $urlBuilder)
 
 try
 {
-    $break = '</br>';
+    $break = php_sapi_name() == 'cli' ? "\n" : '</br>';
 
     $vendorId = $config['vendor_id'];
     $existingSaleOfferingId = '192e07d3-deab-4160-9c0f-0a5fc248fd0b';
