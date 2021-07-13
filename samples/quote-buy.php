@@ -55,7 +55,7 @@ $request->products[] = $product2;
 
 try
 {
-    $break = '</br>';
+    $break = php_sapi_name() == 'cli' ? "\n" : '</br>';
 
     echo 'Sending OfferingRequest...'.$break.$break;
 
@@ -94,9 +94,9 @@ try
     echo $break.'Submitting OfferingResult...'.$break.$break;
 
     if ($client->submitOfferingResult($offeringResult)){
-        echo 'Offering result submit successfully';
+        echo "Offering result submit successfully$break";
     }else{
-        echo 'Result failed';
+        echo "Result failed$break";
     }
 }
 catch(BP\InsureHubApiValidationException $validationException){

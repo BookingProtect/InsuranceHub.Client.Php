@@ -30,7 +30,7 @@ $cancellationRequest->offeringId = '8be79be5-e276-432b-b888-23bc099e067a';
 
 try
 {
-    $break = '</br>';
+    $break = php_sapi_name() == 'cli' ? "\n" : '</br>';
 
     echo 'Cancelling sale for Offering '.$cancellationRequest->offeringId.$break.$break;
 

@@ -32,7 +32,7 @@ $priceBandRequest->price = 15.55;
 
 try
 {
-    $break = '</br>';
+    $break = php_sapi_name() == 'cli' ? "\n" : '</br>';
 
     echo 'Retrieving Price Band info for '.$priceBandRequest->productCode.', '.$priceBandRequest->currencyCode.' and '.$priceBandRequest->price.$break.$break;
 

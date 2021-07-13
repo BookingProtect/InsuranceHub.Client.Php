@@ -31,7 +31,7 @@ $matrixRequest->currencyCode = 'GBP';
 
 try
 {
-    $break = '</br>';
+    $break = php_sapi_name() == 'cli' ? "\n" : '</br>';
 
     echo 'Retrieving Matrix info for '.$matrixRequest->productCode.' and '.$matrixRequest->currencyCode.$break.$break;
 

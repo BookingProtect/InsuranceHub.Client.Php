@@ -27,7 +27,7 @@ $client = new BP\ApiClient($apiConfig, new BP\AuthTokenGenerator(), $urlBuilder)
 
 try
 {
-    $break = '</br>';
+    $break = php_sapi_name() == 'cli' ? "\n" : '</br>';
 
     $vendorId = $config['vendor_id'];
     $existingSaleOfferingId = '192e07d3-deab-4160-9c0f-0a5fc248fd0b';

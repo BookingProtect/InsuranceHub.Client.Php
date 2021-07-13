@@ -36,7 +36,7 @@ $policySearch->customerSurname = 'Customer Surname';
 
 try
 {
-    $break = '</br>';
+    $break = php_sapi_name() == 'cli' ? "\n" : '</br>';
 
     echo 'Searching for policies...'.$break.$break;
 
