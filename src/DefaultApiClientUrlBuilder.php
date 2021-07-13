@@ -26,9 +26,6 @@ class DefaultApiClientUrlBuilder implements IApiClientUrlBuilder {
     private const POLICY_SEARCH_URL_UAT = 'https://admin.uat.insure-hub.net/policy/search';
     private const POLICY_SEARCH_BY_OFFERING_ID_URL_UAT = 'https://admin.uat.insure-hub.net/policy/search-by-offering-id';
 
-    const ENVIRONMENT_PRODUCTION = 'PRODUCTION';
-    const ENVIRONMENT_TESTING = 'UAT';
-
     private ApiClientConfiguration $configuration;
 
     public function __construct(ApiClientConfiguration $configuration) {
@@ -36,7 +33,7 @@ class DefaultApiClientUrlBuilder implements IApiClientUrlBuilder {
     }
 
     public function offeringRequestUrl(): string {
-        if ($this->configuration->environment == self::ENVIRONMENT_PRODUCTION) {
+        if ($this->configuration->environment == IApiClient::ENVIRONMENT_PRODUCTION) {
             return self::OFFERING_REQUEST_URL_PROD;
         }
 
@@ -44,7 +41,7 @@ class DefaultApiClientUrlBuilder implements IApiClientUrlBuilder {
     }
 
     public function offeringResultUrl(): string {
-        if ($this->configuration->environment == self::ENVIRONMENT_PRODUCTION) {
+        if ($this->configuration->environment == IApiClient::ENVIRONMENT_PRODUCTION) {
             return self::OFFERING_RESULT_URL_PROD;
         }
 
@@ -52,7 +49,7 @@ class DefaultApiClientUrlBuilder implements IApiClientUrlBuilder {
     }
 
     public function cancellationUrl(): string {
-        if ($this->configuration->environment == self::ENVIRONMENT_PRODUCTION) {
+        if ($this->configuration->environment == IApiClient::ENVIRONMENT_PRODUCTION) {
             return self::CANCELLATION_URL_PROD;
         }
 
@@ -60,7 +57,7 @@ class DefaultApiClientUrlBuilder implements IApiClientUrlBuilder {
     }
 
     public function adjustmentRequestUrl(): string {
-        if ($this->configuration->environment == self::ENVIRONMENT_PRODUCTION) {
+        if ($this->configuration->environment == IApiClient::ENVIRONMENT_PRODUCTION) {
             return self::ADJUSTMENT_REQUEST_URL_PROD;
         }
 
@@ -68,7 +65,7 @@ class DefaultApiClientUrlBuilder implements IApiClientUrlBuilder {
     }
 
     public function adjustmentResultUrl(): string {
-        if ($this->configuration->environment == self::ENVIRONMENT_PRODUCTION) {
+        if ($this->configuration->environment == IApiClient::ENVIRONMENT_PRODUCTION) {
             return self::ADJUSTMENT_RESULT_URL_PROD;
         }
 
@@ -78,7 +75,7 @@ class DefaultApiClientUrlBuilder implements IApiClientUrlBuilder {
     public function matrixUrl(MatrixRequest $matrixRequest): string {
         $url = self::MATRIX_URL_UAT;
 
-        if ($this->configuration->environment == self::ENVIRONMENT_PRODUCTION) {
+        if ($this->configuration->environment == IApiClient::ENVIRONMENT_PRODUCTION) {
             $url = self::MATRIX_URL_PROD;
         }
 
@@ -88,7 +85,7 @@ class DefaultApiClientUrlBuilder implements IApiClientUrlBuilder {
     public function priceBandUrl(PriceBandRequest $priceBandRequest): string {
         $url = self::MATRIX_URL_UAT;
 
-        if ($this->configuration->environment == self::ENVIRONMENT_PRODUCTION) {
+        if ($this->configuration->environment == IApiClient::ENVIRONMENT_PRODUCTION) {
             $url = self::MATRIX_URL_PROD;
         }
 
@@ -96,7 +93,7 @@ class DefaultApiClientUrlBuilder implements IApiClientUrlBuilder {
     }
 
     public function policySearchUrl(): string {
-        if ($this->configuration->environment == self::ENVIRONMENT_PRODUCTION) {
+        if ($this->configuration->environment == IApiClient::ENVIRONMENT_PRODUCTION) {
             return self::POLICY_SEARCH_URL_PROD;
         }
 
@@ -104,7 +101,7 @@ class DefaultApiClientUrlBuilder implements IApiClientUrlBuilder {
     }
 
     public function policySearchByOfferingIdUrl(): string {
-        if ($this->configuration->environment == self::ENVIRONMENT_PRODUCTION) {
+        if ($this->configuration->environment == IApiClient::ENVIRONMENT_PRODUCTION) {
             return self::POLICY_SEARCH_BY_OFFERING_ID_URL_PROD;
         }
 

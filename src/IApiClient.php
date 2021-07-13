@@ -3,6 +3,11 @@
 namespace BookingProtect\InsuranceHub\Client;
 
 interface IApiClient {
+    const ENVIRONMENT_PRODUCTION = 'PRODUCTION';
+    const ENVIRONMENT_TESTING = 'UAT';
+
+    const PRODUCT_CATEGORY_TICKET = 'TKT';
+
     public function getOffering(OfferingRequest $offeringRequest): Offering;
 
     public function submitOfferingResult(OfferingResult $offeringResult): bool;
