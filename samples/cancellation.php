@@ -4,7 +4,7 @@
 // ****************************************************************
 
 // include client lib - as below or via compose
-include '..\src\client.php';
+include __DIR__ . '/../vendor/autoload.php';
 
 // import namespace
 use BookingProtect\InsuranceHub\Client as BP;

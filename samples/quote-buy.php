@@ -4,7 +4,7 @@
 // ****************************************************************
 
 // include client lib - as below or via compose
-include '..\src\client.php';
+include __DIR__ . '/../vendor/autoload.php';
 
 // import namespace
 use BookingProtect\InsuranceHub\Client as BP;
@@ -17,7 +17,7 @@ $config = parse_ini_file('config.ini');
 $apiConfig = new BP\ApiClientConfiguration();
 
 $apiConfig->environment = $config['environment'];
-$apiConfig->certificatePath = getcwd().'\cacert.pem'; // change this to somewhere appropriate on your server (Latest Mozilla certificate store can be found here - https://curl.haxx.se/docs/caextract.html )
+$apiConfig->certificatePath = __DIR__ . '/cacert.pem'; // change this to somewhere appropriate on your server (Latest Mozilla certificate store can be found here - https://curl.haxx.se/docs/caextract.html )
 $apiConfig->apiKey = $config['api_key'];
 $apiConfig->vendorId = $config['vendor_id'];
 
@@ -30,7 +30,7 @@ $request = new BP\OfferingRequest();
 $request->vendorId = $config['vendor_id'];
 
 // set values relating to transaction
-$request->vendorRequestReference = 'abc123'; // this can be null - only used as an identifier for your request
+$request->vendorRequestReference = uniqid('TEST_REF_'); // this can be null - only used as an identifier for your request
 
 $eventDate = new DateTime();
 $eventDate->modify('+1 month');
@@ -38,15 +38,15 @@ $eventDate->modify('+1 month');
 // create products from user's shopping cart
 $product1 = new BP\Product();
 $product1->categoryCode = 'TKT';
-$product1->languageCode = 'eng';
-$product1->currencyCode = 'GBP';
+$product1->languageCode = 'spa';
+$product1->currencyCode = 'EUR';
 $product1->price = 100.00;
 $product1->completionDate = $eventDate;
 
 $product2 = new BP\Product();
 $product2->categoryCode = 'TKT';
-$product2->languageCode = 'eng';
-$product2->currencyCode = 'GBP';
+$product2->languageCode = 'spa';
+$product2->currencyCode = 'EUR';
 $product2->price = 100.00;
 $product2->completionDate = $eventDate;
 
