@@ -8,6 +8,7 @@ include '..\vendor\autoload.php';
 
 // import namespace
 use BookingProtect\InsuranceHub\Client as BP;
+use GuzzleHttp\Client;
 
 // read config from server or any other system you use to store configuration
 // ** make sue this is not stored in a public folder **
@@ -23,7 +24,9 @@ $apiConfig->vendorId = $config['vendor_id'];
 
 $urlBuilder = new BP\DefaultApiClientUrlBuilder($apiConfig);
 $autoTokenGenerator = new BP\AuthTokenGenerator();
-$client = new BP\ApiClient($apiConfig, new BP\AuthTokenGenerator(), $urlBuilder);
+$httpClient = new Client();
+$jsonMapper = new JsonMapper();
+$client = new BP\ApiClient($apiConfig, new BP\AuthTokenGenerator(), $urlBuilder, $httpClient, $jsonMapper);
 
 try
 {

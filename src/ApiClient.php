@@ -3,7 +3,7 @@
 namespace BookingProtect\InsuranceHub\Client;
 
 use Exception;
-use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
@@ -17,12 +17,14 @@ class ApiClient implements IApiClient {
     private ApiClientConfiguration $configuration;
     private IApiClientUrlBuilder $apiClientUrlBuilder;
     private JsonMapper $jsonMapper;
+    private ClientInterface $httpClient;
 
-    public function __construct(ApiClientConfiguration $configuration, IAuthTokenGenerator $authTokenGenerator, IApiClientUrlBuilder $apiClientUrlBuilder) {
+    public function __construct(ApiClientConfiguration $configuration, IAuthTokenGenerator $authTokenGenerator, IApiClientUrlBuilder $apiClientUrlBuilder, ClientInterface $httpClient, JsonMapper $mapper) {
         $this->authTokenGenerator  = $authTokenGenerator;
         $this->configuration       = $configuration;
         $this->apiClientUrlBuilder = $apiClientUrlBuilder;
-        $this->jsonMapper          = new JsonMapper();
+        $this->jsonMapper = $mapper;
+        $this->httpClient = $httpClient;
     }
 
     /**
@@ -178,13 +180,12 @@ class ApiClient implements IApiClient {
         $authToken = $this->authTokenGenerator->generateToken($this->configuration->vendorId, $this->configuration->apiKey);
 
         $body = $requestBody ? json_encode($requestBody) : null;
-        $client = new Client();
         $request = new Request($method, $url, [
             'Content-Type' => 'application/json',
             'Authorization' => 'Bearer ' . $this->configuration->vendorId . '|' . $authToken
         ], $body);
         try {
-            return $client->send($request, [
+            return $this->httpClient->send($request, [
                 RequestOptions::VERIFY => $this->configuration->certificatePath,
             ]);
         }
