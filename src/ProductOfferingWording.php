@@ -12,5 +12,5 @@ class ProductOfferingWording {
     public ?string $advertisement;
     public ?string $advertisementUrl;
     public string $logoUrl;
-    public string $termsAndConditions;
+    public string $termsAndConditionsUrl;
 }
