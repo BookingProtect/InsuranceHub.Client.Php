@@ -4,39 +4,42 @@
 // ****************************************************************
 
 // include client lib - as below or via compose
-include '..\src\client.php';
+include __DIR__ . '/../vendor/autoload.php';
 
 // import namespace
 use BookingProtect\InsuranceHub\Client as BP;
+use GuzzleHttp\Client;
 
 // read config from server or any other system you use to store configuration
 // ** make sue this is not stored in a public folder **
-$config = parse_ini_file('config.ini');
+$config = parse_ini_file(__DIR__ . '/config.ini');
 
 // create client - can be instantiated as below or via dependency injection
 $apiConfig = new BP\ApiClientConfiguration();
 
 $apiConfig->environment = $config['environment'];
-$apiConfig->certificatePath = getcwd().'\cacert.pem'; // change this to somewhere appropriate on your server (Latest Mozilla certificate store can be found here - https://curl.haxx.se/docs/caextract.html )
+$apiConfig->certificatePath = __DIR__ . '/cacert.pem'; // change this to somewhere appropriate on your server (Latest Mozilla certificate store can be found here - https://curl.haxx.se/docs/caextract.html )
 $apiConfig->apiKey = $config['api_key'];
 $apiConfig->vendorId = $config['vendor_id'];
 
 $urlBuilder = new BP\DefaultApiClientUrlBuilder($apiConfig);
 $autoTokenGenerator = new BP\AuthTokenGenerator();
-$client = new BP\ApiClient($apiConfig, new BP\AuthTokenGenerator(), $urlBuilder);
+$httpClient = new Client();
+$jsonMapper = new JsonMapper();
+$client = new BP\ApiClient($apiConfig, new BP\AuthTokenGenerator(), $urlBuilder, $httpClient, $jsonMapper);
 
 $vendorId = $config['vendor_id'];
 
 $policySearch = new BP\PolicySearch();
 
 $policySearch->vendorId = $vendorId;
-$policySearch->vendorSalesReference = 'Your Sales Reference/Invoice Number';
+$policySearch->vendorSalesReference = uniqid('TEST_REF_'); // this can be null - only used as an identifier for your request
 $policySearch->customerForename = 'Customer Forename';
 $policySearch->customerSurname = 'Customer Surname';
 
 try
 {
-    $break = '</br>';
+    $break = php_sapi_name() == 'cli' ? "\n" : '</br>';
 
     echo 'Searching for policies...'.$break.$break;
 
