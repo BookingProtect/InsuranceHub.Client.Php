@@ -6,9 +6,10 @@ use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\RequestOptions;
 use JsonMapper;
+use JsonSerializable;
+use Psr\Http\Message\ResponseInterface;
 
 class ApiClient implements IApiClient {
     private IAuthTokenGenerator $authTokenGenerator;
@@ -161,14 +162,17 @@ class ApiClient implements IApiClient {
     }
 
     /**
-     * @param OfferingRequest|OfferingResult|MatrixRequest|PriceBandRequest|PolicySearch|PolicySearchByOfferingId|AdjustmentRequest|AdjustmentOfferingResult|CancellationRequest $requestBody
+     * @param string $url
+     * @param string $method
+     * @param ?JsonSerializable $requestBody
      *
-     * @throws InsureHubApiAuthorisationException
+     * @return ResponseInterface
      * @throws InsureHubApiAuthenticationException
+     * @throws InsureHubApiAuthorisationException
      * @throws InsureHubApiException
      * @throws InsureHubApiValidationException
      */
-    private function execute(string $url, string $method, $requestBody = NULL): Response {
+    private function execute(string $url, string $method, ?JsonSerializable $requestBody = null): ResponseInterface {
         $authToken = $this->authTokenGenerator->generateToken($this->configuration->vendorId, $this->configuration->apiKey);
 
         $client = new Client();
