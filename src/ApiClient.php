@@ -4,6 +4,7 @@ namespace BookingProtect\InsuranceHub\Client;
 
 use Exception;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
@@ -167,6 +168,7 @@ class ApiClient implements IApiClient {
      * @param ?JsonSerializable $requestBody
      *
      * @return ResponseInterface
+     *
      * @throws InsureHubApiAuthenticationException
      * @throws InsureHubApiAuthorisationException
      * @throws InsureHubApiException
@@ -175,30 +177,31 @@ class ApiClient implements IApiClient {
     private function execute(string $url, string $method, ?JsonSerializable $requestBody = null): ResponseInterface {
         $authToken = $this->authTokenGenerator->generateToken($this->configuration->vendorId, $this->configuration->apiKey);
 
+        $body = $requestBody ? json_encode($requestBody) : null;
         $client = new Client();
         $request = new Request($method, $url, [
             'Content-Type' => 'application/json',
             'Authorization' => 'Bearer ' . $this->configuration->vendorId . '|' . $authToken
-        ], $requestBody ? json_encode($requestBody) : null);
+        ], $body);
         try {
-            $response = $client->send($request, [
-                RequestOptions::VERIFY => $this->configuration->certificatePath
+            return $client->send($request, [
+                RequestOptions::VERIFY => $this->configuration->certificatePath,
             ]);
-            switch ($response->getStatusCode()) {
+        }
+        catch (ClientException $e) {
+            switch ($e->getResponse()->getStatusCode()) {
                 case 401:
                     throw new InsureHubApiAuthenticationException();
                 case 403:
                     throw new InsureHubApiAuthorisationException();
                 case 400:
-                    $validationError    = json_decode($response->getBody()->getContents());
+                    $validationError    = json_decode($e->getResponse()->getBody()->getContents());
                     $validationMessages = implode(',', $validationError->validationMessages);
                     throw new InsureHubApiValidationException($validationMessages);
-                case 500:
-                    $apiError = json_decode($response->getBody()->getContents());
+                default:
+                    $apiError = json_decode($e->getResponse()->getBody()->getContents());
                     throw new InsureHubApiException($apiError->message);
             }
-
-            return $response;
         }
         catch (GuzzleException $e) {
             throw new InsureHubApiException($e);

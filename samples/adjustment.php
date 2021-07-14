@@ -11,7 +11,7 @@ use BookingProtect\InsuranceHub\Client as BP;
 
 // read config from server or any other system you use to store configuration
 // ** make sue this is not stored in a public folder **
-$config = parse_ini_file('config.ini');
+$config = parse_ini_file(__DIR__ . '/config.ini');
 
 // create client - can be instantiated as below or via dependency injection
 $apiConfig = new BP\ApiClientConfiguration();
