@@ -45,6 +45,10 @@ try
         echo 'Unable to cancel sale';
     }
 }
+catch(BP\InsureHubApiNotFoundException $validationException){
+    echo 'Not found';
+    echo $validationException->errorMessage();
+}
 catch(BP\InsureHubApiValidationException $validationException){
     echo 'Invalid Request';
     echo $validationException->errorMessage();
