@@ -32,6 +32,7 @@ class ApiClient implements IApiClient {
      * @throws InsureHubApiAuthenticationException
      * @throws InsureHubApiException
      * @throws InsureHubApiValidationException
+     * @throws InsureHubApiNotFoundException
      * @throws Exception
      */
     public function getOffering(OfferingRequest $offeringRequest): Offering {
@@ -44,6 +45,7 @@ class ApiClient implements IApiClient {
      * @throws InsureHubApiAuthorisationException
      * @throws InsureHubApiAuthenticationException
      * @throws InsureHubApiException
+     * @throws InsureHubApiNotFoundException
      * @throws InsureHubApiValidationException
      */
     public function submitOfferingResult(OfferingResult $offeringResult): bool {
@@ -57,6 +59,7 @@ class ApiClient implements IApiClient {
      * @throws InsureHubApiAuthenticationException
      * @throws InsureHubApiException
      * @throws InsureHubApiValidationException
+     * @throws InsureHubApiNotFoundException
      * @throws Exception
      */
     public function getMatrix(MatrixRequest $matrixRequest): ?Matrix {
@@ -75,6 +78,7 @@ class ApiClient implements IApiClient {
      * @throws InsureHubApiAuthenticationException
      * @throws InsureHubApiException
      * @throws InsureHubApiValidationException
+     * @throws InsureHubApiNotFoundException
      * @throws Exception
      */
     public function getPriceBand(PriceBandRequest $priceBandRequest): ?PriceBand {
@@ -94,6 +98,7 @@ class ApiClient implements IApiClient {
      * @throws InsureHubApiException
      * @throws InsureHubApiValidationException
      * @throws InsureHubApiAuthorisationException
+     * @throws InsureHubApiNotFoundException
      * @throws Exception
      */
     public function searchForPolicy(PolicySearch $policySearch): array {
@@ -114,6 +119,7 @@ class ApiClient implements IApiClient {
      * @throws InsureHubApiAuthenticationException
      * @throws InsureHubApiException
      * @throws InsureHubApiValidationException
+     * @throws InsureHubApiNotFoundException
      * @throws Exception
      */
     public function searchForPolicyByOfferingId(PolicySearchByOfferingId $policySearch): ?Policy {
@@ -132,6 +138,7 @@ class ApiClient implements IApiClient {
      * @throws InsureHubApiAuthenticationException
      * @throws InsureHubApiException
      * @throws InsureHubApiValidationException
+     * @throws InsureHubApiNotFoundException
      * @throws Exception
      */
     public function getAdjustmentOffering(AdjustmentRequest $adjustmentRequest): AdjustmentOffering {
@@ -145,6 +152,7 @@ class ApiClient implements IApiClient {
      * @throws InsureHubApiAuthenticationException
      * @throws InsureHubApiException
      * @throws InsureHubApiValidationException
+     * @throws InsureHubApiNotFoundException
      */
     public function submitAdjustmentResult(AdjustmentOfferingResult $adjustmentResult): bool {
         $result = $this->execute($this->apiClientUrlBuilder->adjustmentResultUrl(), 'POST', $adjustmentResult);
@@ -157,6 +165,7 @@ class ApiClient implements IApiClient {
      * @throws InsureHubApiAuthenticationException
      * @throws InsureHubApiException
      * @throws InsureHubApiValidationException
+     * @throws InsureHubApiNotFoundException
      */
     public function cancelSale(CancellationRequest $cancellationRequest): bool {
         $result = $this->execute($this->apiClientUrlBuilder->cancellationUrl(), 'POST', $cancellationRequest);
@@ -175,6 +184,7 @@ class ApiClient implements IApiClient {
      * @throws InsureHubApiAuthorisationException
      * @throws InsureHubApiException
      * @throws InsureHubApiValidationException
+     * @throws InsureHubApiNotFoundException
      */
     private function execute(string $url, string $method, ?JsonSerializable $requestBody = null): ResponseInterface {
         $authToken = $this->authTokenGenerator->generateToken($this->configuration->vendorId, $this->configuration->apiKey);
@@ -191,14 +201,16 @@ class ApiClient implements IApiClient {
         }
         catch (ClientException $e) {
             switch ($e->getResponse()->getStatusCode()) {
-                case 401:
-                    throw new InsureHubApiAuthenticationException();
-                case 403:
-                    throw new InsureHubApiAuthorisationException();
                 case 400:
                     $validationError    = json_decode($e->getResponse()->getBody()->getContents());
                     $validationMessages = implode(',', $validationError->validationMessages);
                     throw new InsureHubApiValidationException($validationMessages);
+                case 401:
+                    throw new InsureHubApiAuthenticationException();
+                case 403:
+                    throw new InsureHubApiAuthorisationException();
+                case 404:
+                    throw new InsureHubApiNotFoundException();
                 default:
                     $apiError = json_decode($e->getResponse()->getBody()->getContents());
                     throw new InsureHubApiException($apiError->message);
