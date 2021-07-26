@@ -38,7 +38,7 @@ class ApiClient implements IApiClient {
     public function getOffering(OfferingRequest $offeringRequest): Offering {
         $result = $this->execute($this->apiClientUrlBuilder->offeringRequestUrl(), 'POST', $offeringRequest);
 
-        return $this->jsonMapper->map(json_decode($result->getBody()->getContents()), new Offering());
+        return $this->jsonMapper->map(json_decode($result->getBody()), new Offering());
     }
 
     /**
@@ -65,7 +65,7 @@ class ApiClient implements IApiClient {
     public function getMatrix(MatrixRequest $matrixRequest): ?Matrix {
         $result = $this->execute($this->apiClientUrlBuilder->matrixUrl($matrixRequest), 'GET');
 
-        $data = $result->getBody()->getContents();
+        $data = $result->getBody();
         if (is_null($data)) {
             return NULL;
         }
@@ -84,7 +84,7 @@ class ApiClient implements IApiClient {
     public function getPriceBand(PriceBandRequest $priceBandRequest): ?PriceBand {
         $result = $this->execute($this->apiClientUrlBuilder->priceBandUrl($priceBandRequest), 'GET');
 
-        $data = $result->getBody()->getContents();
+        $data = $result->getBody();
         if (is_null($data)) {
             return null;
         }
@@ -104,7 +104,7 @@ class ApiClient implements IApiClient {
     public function searchForPolicy(PolicySearch $policySearch): array {
         $result = $this->execute($this->apiClientUrlBuilder->policySearchUrl(), 'POST', $policySearch);
 
-        $data = $result->getBody()->getContents();
+        $data = $result->getBody();
         if (is_null($data)) {
             return [];
         }
@@ -125,7 +125,7 @@ class ApiClient implements IApiClient {
     public function searchForPolicyByOfferingId(PolicySearchByOfferingId $policySearch): ?Policy {
         $result = $this->execute($this->apiClientUrlBuilder->policySearchByOfferingIdUrl(), 'POST', $policySearch);
 
-        $data = $result->getBody()->getContents();
+        $data = $result->getBody();
         if (is_null($data)) {
             return NULL;
         }
@@ -144,7 +144,7 @@ class ApiClient implements IApiClient {
     public function getAdjustmentOffering(AdjustmentRequest $adjustmentRequest): AdjustmentOffering {
         $result = $this->execute($this->apiClientUrlBuilder->adjustmentRequestUrl(), 'POST', $adjustmentRequest);
 
-        return $this->jsonMapper->map(json_decode($result->getBody()->getContents()), new AdjustmentOffering());
+        return $this->jsonMapper->map(json_decode($result->getBody()), new AdjustmentOffering());
     }
 
     /**
@@ -186,7 +186,7 @@ class ApiClient implements IApiClient {
      * @throws InsureHubApiValidationException
      * @throws InsureHubApiNotFoundException
      */
-    private function execute(string $url, string $method, ?JsonSerializable $requestBody = null): ResponseInterface {
+    private function execute(string $url, string $method, ?JsonSerializable $requestBody = null): ?string {
         $authToken = $this->authTokenGenerator->generateToken($this->configuration->vendorId, $this->configuration->apiKey);
 
         $body = $requestBody ? json_encode($requestBody) : null;
@@ -195,14 +195,16 @@ class ApiClient implements IApiClient {
             'Authorization' => 'Bearer ' . $this->configuration->vendorId . '|' . $authToken
         ], $body);
         try {
-            return $this->httpClient->send($request, [
+            $response = $this->httpClient->send($request, [
                 RequestOptions::VERIFY => $this->configuration->certificatePath,
             ]);
+            $response->getBody()->rewind();
+            return $response;
         }
         catch (ClientException $e) {
             switch ($e->getResponse()->getStatusCode()) {
                 case 400:
-                    $validationError    = json_decode($e->getResponse()->getBody()->getContents());
+                    $validationError    = json_decode($e->getResponse()->getBody());
                     $validationMessages = implode(',', $validationError->validationMessages);
                     throw new InsureHubApiValidationException($validationMessages);
                 case 401:
@@ -212,7 +214,7 @@ class ApiClient implements IApiClient {
                 case 404:
                     throw new InsureHubApiNotFoundException();
                 default:
-                    $apiError = json_decode($e->getResponse()->getBody()->getContents());
+                    $apiError = json_decode($e->getResponse()->getBody());
                     throw new InsureHubApiException($apiError->message);
             }
         }
