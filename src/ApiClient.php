@@ -186,7 +186,7 @@ class ApiClient implements IApiClient {
      * @throws InsureHubApiValidationException
      * @throws InsureHubApiNotFoundException
      */
-    private function execute(string $url, string $method, ?JsonSerializable $requestBody = null): ?string {
+    private function execute(string $url, string $method, ?JsonSerializable $requestBody = null): ?ResponseInterface {
         $authToken = $this->authTokenGenerator->generateToken($this->configuration->vendorId, $this->configuration->apiKey);
 
         $body = $requestBody ? json_encode($requestBody) : null;
