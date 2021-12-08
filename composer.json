@@ -21,10 +21,10 @@
     "psr-4": {"BookingProtect\\InsuranceHub\\Client\\": "src/"}
   },
   "require": {
-    "php": "^7.4|| ^8.0",
+    "php": "^7.4 || ^8.0",
     "ext-curl": "*",
     "ext-json": "*",
-    "guzzlehttp/guzzle": "^6.0",
+    "guzzlehttp/guzzle": "^7.0",
     "netresearch/jsonmapper": "^4.0"
   },
   "require-dev": {
