@@ -51,6 +51,7 @@ try
         echo 'Offering ID: '.$policy->offeringId.$break;
         echo 'Forename: '.$policy->customerForename.$break;
         echo 'Surname: '.$policy->customerSurname.$break;
+        echo 'Email Address: '.$policy->emailAddress.$break;
         echo 'Vendor Sales Reference: '.$policy->vendorSalesReference.$break;
         echo 'Purchase Date: '.$policy->purchaseDate->format('Y-m-d\TH:i:s.vO').$break;
         echo 'Policy has '.count($policy->items).' policy items'.$break.$break;

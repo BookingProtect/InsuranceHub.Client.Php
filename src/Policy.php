@@ -12,6 +12,7 @@ class Policy {
     public string $vendorSalesReference;
     public string $customerForename;
     public string $customerSurname;
+    public string $emailAddress;
     /**
      * @var PolicyItem[]
      */

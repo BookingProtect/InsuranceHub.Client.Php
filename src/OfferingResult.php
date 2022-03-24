@@ -9,6 +9,7 @@ class OfferingResult implements JsonSerializable {
         $this->vendorSaleReference = NULL;
         $this->customerForename    = NULL;
         $this->customerSurname     = NULL;
+        $this->emailAddress        = NULL;
         $this->sales               = [];
     }
 
@@ -17,6 +18,7 @@ class OfferingResult implements JsonSerializable {
     public ?string $vendorSaleReference;
     public ?string $customerForename;
     public ?string $customerSurname;
+    public ?string $emailAddress;
     /**
      * @var ProductOfferingResult[]
      */
@@ -29,6 +31,7 @@ class OfferingResult implements JsonSerializable {
             'vendorSaleReference' => $this->vendorSaleReference,
             'customerForename'    => $this->customerForename,
             'customerSurname'     => $this->customerSurname,
+            'emailAddress'        => $this->emailAddress,
             'sales'               => $this->sales
         ];
     }

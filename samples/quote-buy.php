@@ -83,6 +83,7 @@ try
     $offeringResult->vendorSaleReference = 'Your Sales Reference/Invoice Number';
     $offeringResult->customerSurname = 'Customer Surname';
     $offeringResult->customerForename = 'Customer Forename';
+    $offeringResult->emailAddress = 'customer@testing.com';
 
     // set customer's choice - did they want to protect their purchase?
     foreach ($offering->productOfferings as $productOffering) {
