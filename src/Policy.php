@@ -13,6 +13,7 @@ class Policy {
     public string $customerForename;
     public string $customerSurname;
     public string $emailAddress;
+    public string $phoneNumber;
     /**
      * @var PolicyItem[]
      */
